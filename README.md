@@ -3,12 +3,11 @@
 ## Development
 
 ```
-make watch
+pnpm run dev
 ```
 
 ## Deployment
 
 ```
-make
-make deploy
+pnpm run build
 ```

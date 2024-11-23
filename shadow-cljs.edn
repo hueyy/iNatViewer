@@ -1,6 +1,7 @@
 {:source-paths ["src"]
  :dependencies [[reagent "1.2.0"]
-                [metosin/reitit "0.7.2"]]
+                [metosin/reitit "0.7.2"]
+                [cljs-http "0.1.48"]]
  :dev-http {8000 "public/"}
  :builds {:app {:target :browser
                 :output-dir "public/js"

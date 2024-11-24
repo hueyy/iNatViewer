@@ -27,9 +27,8 @@ const CarouselSlide = (props) => {
 const CarouselControls = (props) => {
   const { className, photo } = props
 
-  const location = useLocation()
   const goBack = useCallback(() => {
-    location.history.back()
+    history.back()
   })
 
   return (
@@ -92,7 +91,7 @@ const ObservationIndividualView = (props) => {
     if (typeof id === `undefined` || id === null || id.length === 0) {
       location.history.back()
     } else {
-      const observationURL = `https://www.inaturalist.org/observations/248003429.json`;
+      const observationURL = `https://www.inaturalist.org/observations/${id}.json`;
       (async () => {
         const data = await getObservationByURL(observationURL)
         setObservation(data)

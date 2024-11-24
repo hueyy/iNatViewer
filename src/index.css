@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.quick-fade {
+  transition: opacity 250ms linear, visibility 0ms linear 250ms;
+}

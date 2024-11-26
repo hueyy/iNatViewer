@@ -55,22 +55,29 @@ const getName = (observation) => {
 
 const PhotoPreviews = (props) => {
   const { className, photos, currentIndex } = props
+  const selectedPhotoClassName = `w-8 h-8 md:w-14 md:h-14 opacity-100`
+  const normalPhotoClassName = `w-6 h-6 md:w-10 md:h-10 opacity-70`
   return (
-    <div className={`w-full flex justify-center items-center gap-3 pb-4 ${className}`}>
+    <div className={`w-full flex justify-center items-center gap-2 md:gap-3 pb-4 ${className}`}>
       {
-        photos.map((photo, index) => (
-          <a
-            href={`#${photo.photo.id}`}
-            className="no-underline"
-          >
-            <img
-              key={photo.photo.id}
-              className={`${index === currentIndex ? `w-14 h-14 opacity-100` : `w-10 h-10 opacity-70`} aspect-square`}
-              src={photo.photo.square_url}
-              alt={photo.photo.attribution}
-            />
-          </a>
-        ))
+        photos.map((photo, index) => {
+          const photoClassName = index === currentIndex
+            ? selectedPhotoClassName
+            : normalPhotoClassName
+          return (
+            <a
+              href={`#${photo.photo.id}`}
+              className="no-underline"
+            >
+              <img
+                key={photo.photo.id}
+                className={`${photoClassName} aspect-square`}
+                src={photo.photo.square_url}
+                alt={photo.photo.attribution}
+              />
+            </a>
+          )
+        })
       }
     </div>
   )

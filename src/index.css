@@ -1,7 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer base {
 
-.quick-fade {
-  transition: opacity 250ms linear, visibility 0ms linear 250ms;
+  a {
+    @apply text-blue-900 underline;
+  }
+
+  a:hover {
+    @apply decoration-dotted;
+  }
+
+  .quick-fade {
+    transition: opacity 250ms linear, visibility 0ms linear 250ms;
+  }
+
 }

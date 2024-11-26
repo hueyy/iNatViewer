@@ -14,6 +14,7 @@ const CarouselSlide = (props) => {
         className="w-full h-full"
       >
         <img
+          id={photo.photo.id}
           className="w-full h-full object-contain"
           src={srcURL}
           alt={photo.photo.attribution}
@@ -34,7 +35,7 @@ const CarouselControls = (props) => {
   return (
     <div className={`w-full absolute top-0 left-0 flex justify-between py-4 px-6 text-white quick-fade ${className}`}>
       <ArrowUturnLeftIcon className="size-6 cursor-pointer" onClick={goBack} />
-      <a href={`https://www.inaturalist.org/photos/${photo.photo.id}`}>
+      <a className="text-white no-underline" href={`https://www.inaturalist.org/photos/${photo.photo.id}`}>
         <InformationCircleIcon className="size-6" />
       </a>
     </div>
@@ -52,14 +53,47 @@ const getName = (observation) => {
   return scientificName
 }
 
+const PhotoPreviews = (props) => {
+  const { className, photos, currentIndex } = props
+  return (
+    <div className={`w-full flex justify-center items-center gap-3 pb-4 ${className}`}>
+      {
+        photos.map((photo, index) => (
+          <a
+            href={`#${photo.photo.id}`}
+            className="no-underline"
+          >
+            <img
+              key={photo.photo.id}
+              className={`${index === currentIndex ? `w-14 h-14 opacity-100` : `w-10 h-10 opacity-70`} aspect-square`}
+              src={photo.photo.square_url}
+              alt={photo.photo.attribution}
+            />
+          </a>
+        ))
+      }
+    </div>
+  )
+}
+
 const LocationLink = (props) => {
   const { location, lat, long } = props
   if (typeof lat === `string` && typeof long === `string` && typeof location === `string`) {
     return (
       <>
-        <a href={`https://www.openstreetmap.org/search?lat=${lat}&lon=${long}&zoom=16`}>{location}</a>&nbsp;
+        <a
+          className="text-white no-underline"
+          href={`https://www.openstreetmap.org/search?lat=${lat}&lon=${long}&zoom=16`}
+        >
+          {location}
+        </a>&nbsp;
         (
-        <a href={`https://www.google.com/maps/search/?api=1&query=${lat},${long}`}>Google Maps</a>
+        <a
+          className="text-white no-underline"
+          href={`https://www.google.com/maps/search/?api=1&query=${lat},${long}`}
+        >
+          Google Maps
+        </a>
         )
       </>
     )
@@ -73,40 +107,48 @@ const LocationLink = (props) => {
 }
 
 const BottomDisplay = (props) => {
-  const { className, observation } = props
+  const { className, observation, currentIndex } = props
   const name = getName(observation)
 
   const rawTimestamp = observation.time_observed_at
   const timestamp = `${(new Date(rawTimestamp)).toDateString()}, ${(new Date(rawTimestamp)).toLocaleTimeString()}`
   const locationString = observation.place_guess
   const { latitude, longitude } = observation
+  const { observation_photos: photos } = observation
 
   return (
-    <div className={`w-full absolute bottom-0 left-0 py-4 px-6 bg-black/60 text-white quick-fade ${className}`}>
-      <a
-        className="font-bold"
-        href={`https://www.inaturalist.org/observations/${observation.id}`}>
-        {name}
-      </a>
-      <div className="text-sm mt-2">
-        <div className="flex" alt={rawTimestamp}>
-          <div className="w-6">
-            <CalendarDaysIcon className="size-4" />
+    <div className={`w-full absolute bottom-0 left-0 quick-fade ${className}`}>
+      <PhotoPreviews
+        className={className}
+        photos={photos}
+        currentIndex={currentIndex}
+      />
+      <div className="py-4 px-6 bg-black/60 text-white">
+        <a
+          className="text-white no-underline font-bold"
+          href={`https://www.inaturalist.org/observations/${observation.id}`}>
+          {name}
+        </a>
+        <div className="text-sm mt-2">
+          <div className="flex" alt={rawTimestamp}>
+            <div className="w-6">
+              <CalendarDaysIcon className="size-4" />
+            </div>
+            <div>
+              {timestamp}
+            </div>
           </div>
-          <div>
-            {timestamp}
-          </div>
-        </div>
-        <div className="flex mt-1">
-          <div className="w-6">
-            <MapPinIcon className="size-4" />
-          </div>
-          <div>
-            <LocationLink
-              location={locationString}
-              lat={latitude}
-              long={longitude}
-            />
+          <div className="flex mt-1">
+            <div className="w-6">
+              <MapPinIcon className="size-4" />
+            </div>
+            <div>
+              <LocationLink
+                location={locationString}
+                lat={latitude}
+                long={longitude}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -133,7 +175,9 @@ const PhotosCarousel = (props) => {
   const [controlsVisible, setControlsVisible] = useState(true)
   const onScroll = useCallback((e) => {
     const { scrollLeft, scrollWidth } = e.target
-    if (scrollLeft === 0 || scrollWidth % scrollLeft === 0) {
+    const width = Math.round(scrollWidth / photos.length)
+
+    if (scrollLeft === 0 || scrollWidth % scrollLeft === 0 || Math.abs(width - scrollWidth % scrollLeft) / width < 0.05) {
       const scrollPosition = Math.round(scrollLeft / (scrollWidth / photos.length))
       setCurrentIndex(scrollPosition)
     }
@@ -163,6 +207,7 @@ const PhotosCarousel = (props) => {
       <BottomDisplay
         className={visibilityClass}
         observation={observation}
+        currentIndex={currentIndex}
       />
     </div>
   )

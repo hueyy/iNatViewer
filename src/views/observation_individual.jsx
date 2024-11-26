@@ -21,7 +21,11 @@ const ObservationIndividualView = (props) => {
   }, [id])
 
   if (typeof observation?.id === `undefined` || observation?.id === null) {
-    return (<h1>Loading...</h1>)
+    return (
+      <div className="bg-black w-screen h-screen flex justify-center items-center text-white font-black text-2xl">
+        Loading...
+      </div>
+    )
   }
 
   return (

@@ -1,5 +1,5 @@
 import { InformationCircleIcon, ArrowUturnLeftIcon, CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/solid"
-import { useCallback, useState } from "preact/hooks"
+import { useCallback, useEffect, useRef, useState } from "preact/hooks"
 
 
 const CarouselSlide = (props) => {
@@ -172,7 +172,13 @@ const PhotosCarousel = (props) => {
   }
 
   const [currentIndex, setCurrentIndex] = useState(0)
+
   const [controlsVisible, setControlsVisible] = useState(true)
+  const toggleControlsVisible = useCallback(() => {
+    setControlsVisible(c => !c)
+  }, [])
+  const visibilityClass = controlsVisible ? `visible opacity-100` : `invisible opacity-0`
+
   const onScroll = useCallback((e) => {
     const { scrollLeft, scrollWidth } = e.target
     const width = Math.round(scrollWidth / photos.length)
@@ -182,10 +188,40 @@ const PhotosCarousel = (props) => {
       setCurrentIndex(scrollPosition)
     }
   }, [])
-  const toggleControlsVisible = useCallback(() => {
-    setControlsVisible(c => !c)
+
+  const scrollDivRef = useRef(null)
+
+  useEffect(() => {
+    document.addEventListener(`wheel`, (e) => {
+      const wheelDelta = e.wheelDelta
+      const delta = Math.max(-1, Math.min(1, (wheelDelta)))
+      if (scrollDivRef.current) {
+        scrollDivRef.current.scrollLeft -= delta * scrollDivRef.current.clientWidth / 3
+      }
+      e.preventDefault()
+    })
+
+    const onKeyDown = (e) => {
+      if (!scrollDivRef.current || e.repeat === true) {
+        return
+      }
+
+      const { key } = e
+      switch (key) {
+        case `ArrowUp`:
+        case `ArrowLeft`:
+          scrollDivRef.current.scrollLeft -= scrollDivRef.current.clientWidth
+          break
+
+        case `ArrowDown`:
+        case `ArrowRight`:
+          scrollDivRef.current.scrollLeft += scrollDivRef.current.clientWidth
+          break
+      }
+    }
+
+    document.addEventListener(`keydown`, onKeyDown)
   }, [])
-  const visibilityClass = controlsVisible ? `visible opacity-100` : `invisible opacity-0`
 
   return (
     <div className="w-full h-screen">
@@ -193,6 +229,7 @@ const PhotosCarousel = (props) => {
         className="w-screen h-screen flex overflow-x-scroll scroll-smooth snap-x"
         onScroll={onScroll}
         onClick={toggleControlsVisible}
+        ref={scrollDivRef}
       >
         {
           photos.map(p => (

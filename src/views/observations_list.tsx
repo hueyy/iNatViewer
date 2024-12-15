@@ -16,6 +16,7 @@ const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
   const id = observation?.id
   const name = getName(observation)
   const image = getOriginalPhoto(observation.photos[0].large_url)
+  const location = observation.place_guess
 
   return (
     <a
@@ -23,8 +24,9 @@ const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
       href={`/observation/${id}`}
       style={{ backgroundImage: `url(${image})` }}
     >
-      <div className="text-center bg-[rgb(0,0,0,0.7)] h-full w-full flex text-white justify-center items-center p-4 opacity-0 group-hover:opacity-100 group-active:opacity-100">
+      <div className="lg:text-lg text-base text-center bg-[rgb(0,0,0,0.7)] h-full w-full flex text-white justify-center items-center p-4 opacity-0 group-hover:opacity-100 group-active:opacity-100">
         {name}
+        {location ? ` in ${location}` : null}
       </div>
     </a>
   )

@@ -30,7 +30,9 @@ export type Observation = {
   latitude: string
   place_guess: string
   photos: ObservationPhoto[]
-  observation_photos: ObservationPhoto[]
+  observation_photos: {
+    photo: ObservationPhoto
+  }[]
 }
 
 export const getObservationsbyURL = async (

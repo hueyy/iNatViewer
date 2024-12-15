@@ -4,12 +4,13 @@ iNatViewer is a simple viewer for iNaturalist observations and images. It is sti
 
 ## Development
 
-```
-pnpm run dev
+```bash
+devenv shell
+dev
 ```
 
 ## Deployment
 
-```
-pnpm run build
+```bash
+devenv shell build
 ```

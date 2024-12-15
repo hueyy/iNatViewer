@@ -7,7 +7,7 @@ import {
 import type { FC, TargetedEvent } from "preact/compat"
 import { useCallback, useEffect, useRef, useState } from "preact/hooks"
 import type { Observation, ObservationPhoto } from "../api"
-import { getName } from "../utils"
+import { getName, getOriginalPhoto } from "../utils"
 
 type CarouselSlideProps = {
   className?: string
@@ -17,7 +17,7 @@ type CarouselSlideProps = {
 const CarouselSlide: FC<CarouselSlideProps> = ({ className = "", photo }) => {
   const [srcURL, setSrcURL] = useState(photo.square_url)
   const onLoad = useCallback(() => {
-    setSrcURL(photo.large_url)
+    setSrcURL(getOriginalPhoto(photo.large_url))
   }, [photo.large_url])
   return (
     <li

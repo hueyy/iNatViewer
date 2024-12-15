@@ -3,7 +3,7 @@ import type { FC } from "preact/compat"
 import { useEffect, useState } from "preact/hooks"
 import type { Observation } from "../api"
 import { getObservationsbyURL } from "../api"
-import { getName } from "../utils"
+import { getName, getOriginalPhoto } from "../utils"
 
 const initialString = "https://www.inaturalist.org/observations"
 // TODO: accept variations to URL and make this more robust
@@ -15,10 +15,7 @@ type ObservationItemProps = {
 const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
   const id = observation?.id
   const name = getName(observation)
-  const image = observation.photos[0].large_url.replace(
-    /large\.jpeg$/,
-    "original.jpeg",
-  )
+  const image = getOriginalPhoto(observation.photos[0].large_url)
 
   return (
     <a

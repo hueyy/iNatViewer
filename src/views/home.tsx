@@ -14,7 +14,7 @@ const HomeView: FC = () => {
           name="url"
           type="text"
           placeholder="URL"
-          value="https://www.inaturalist.org/observations?q=huey.xyz&user_id=hueyl"
+          value="https://www.inaturalist.org/observations?q=huey.xyz&search_on=tags&user_id=hueyl&per_page=200"
         />
         <button
           className="my-4 py-2 px-4 bg-gray-200 border border-gray-700 rounded"

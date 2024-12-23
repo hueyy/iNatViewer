@@ -4,6 +4,8 @@
     "target": "ES2022",
     "lib": ["ES2023"],
     "module": "ESNext",
+    "allowJs": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -16,5 +18,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "server"]
 }

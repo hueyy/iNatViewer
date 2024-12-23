@@ -1,8 +1,12 @@
 [build]
-  publish = "dist"
+  publish = "app/dist"
   command = "pnpm run build"
+  edge_functions = "edge_functions"
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[functions]
+  directory = "functions"

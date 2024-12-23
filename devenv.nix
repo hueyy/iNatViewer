@@ -11,9 +11,10 @@
     };
   };
 
-  scripts.dev.exec = ''
-    pnpm exec vite dev
-  '';
+  processes =
+    {
+      vite.exec = "pnpm exec vite dev";
+    };
 
   scripts.build.exec = ''
     pnpm exec vite build

@@ -21,3 +21,10 @@ Using [`docker-compose`](https://docs.docker.com/compose/)
 docker compose up
 ```
 
+You can specify the port via a `.env` file:
+
+```
+PORT=8002
+```
+
+The default port is `8000`.

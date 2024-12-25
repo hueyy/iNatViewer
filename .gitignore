@@ -39,5 +39,10 @@ devenv.local.nix
 # pre-commit
 .pre-commit-config.yaml
 
+# docker
+.env
+
+# app
 app/public/images
 build/
+

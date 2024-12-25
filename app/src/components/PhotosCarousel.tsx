@@ -6,7 +6,8 @@ import {
 } from "@heroicons/react/24/solid"
 import type { FC, TargetedEvent } from "preact/compat"
 import { useCallback, useEffect, useRef, useState } from "preact/hooks"
-import type { Observation, ObservationPhoto } from "../api"
+import { type Observation, type ObservationPhoto, getAvifURL } from "../api"
+import useAvifHook from "../hooks/useAvifHook"
 import { getName, getOriginalPhoto } from "../utils"
 
 type CarouselSlideProps = {
@@ -15,19 +16,29 @@ type CarouselSlideProps = {
 }
 
 const CarouselSlide: FC<CarouselSlideProps> = ({ className = "", photo }) => {
-  const [srcURL, setSrcURL] = useState(photo.square_url)
+  const [useAvif] = useAvifHook()
+  const [hdReady, setHdReady] = useState(false)
+
+  const originalURL = getOriginalPhoto(photo.large_url)
+  const hdURL = useAvif ? getAvifURL(originalURL, photo.id) : originalURL
   const onLoad = useCallback(() => {
-    setSrcURL(getOriginalPhoto(photo.large_url))
-  }, [photo.large_url])
+    setHdReady(true)
+  }, [])
   return (
     <li
       className={`${className} snap-center bg-black w-screen h-screen shrink-0`}
     >
       <picture className="w-full h-full">
         <img
-          id={photo.id}
-          className="w-full h-full object-contain"
-          src={srcURL}
+          id={`${photo.id}-preview`}
+          className={`w-full h-full object-contain ${hdReady ? "hidden" : ""}`}
+          src={photo.square_url}
+          alt={photo.attribution}
+        />
+        <img
+          id={`${photo.id}`}
+          className={`w-full h-full object-contain ${hdReady ? "visible" : "invisible"}`}
+          src={hdURL}
           alt={photo.attribution}
           onLoad={onLoad}
         />

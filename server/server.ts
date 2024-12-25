@@ -55,7 +55,7 @@ fastify.get(
         fs.mkdirSync(OUTPUT_FOLDER)
       }
 
-      await sharp(inputBuffer).avif({ quality: 70 }).toFile(newFilePath)
+      await sharp(inputBuffer).avif({ quality: 85 }).toFile(newFilePath)
     }
 
     response

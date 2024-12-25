@@ -4,6 +4,7 @@ import { useEffect, useState } from "preact/hooks"
 import type { Observation } from "../api"
 import { getAvifURL, getObservationsbyURL } from "../api"
 import useAvifHook from "../hooks/useAvifHook"
+import useHDReadyHook from "../hooks/useHDReady"
 import { getName } from "../utils"
 
 const initialString = "https://www.inaturalist.org/observations"
@@ -15,6 +16,7 @@ type ObservationItemProps = {
 
 const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
   const [useAvif] = useAvifHook()
+  const [mediumReady, onLoadMedium] = useHDReadyHook()
 
   const id = observation?.id
   const name = getName(observation)
@@ -27,23 +29,23 @@ const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
   const mediumURL = useAvif
     ? getAvifURL(firstPhoto.medium_url, firstPhoto.id)
     : firstPhoto.medium_url
-  const largeURL = useAvif
-    ? getAvifURL(firstPhoto.large_url, firstPhoto.id)
-    : firstPhoto.large_url
 
   return (
     <a className="aspect-square relative group" href={`/observation/${id}`}>
-      <div
-        className="absolute w-full h-full bg-no-repeat bg-cover lg:hidden"
-        style={{ backgroundImage: `url(${smallURL})` }}
-      />
-      <div
-        className="absolute w-full h-full bg-no-repeat bg-cover hidden lg:block 2xl:hidden"
-        style={{ backgroundImage: `url(${mediumURL})` }}
-      />
-      <div
-        className="absolute w-full h-full bg-no-repeat bg-cover hidden 2xl:block"
-        style={{ backgroundImage: `url(${largeURL})` }}
+      {mediumReady ? null : (
+        <img
+          className="absolute w-full h-full object-cover"
+          src={smallURL}
+          loading="lazy"
+          alt={firstPhoto.attribution}
+        />
+      )}
+      <img
+        className={`absolute w-full h-full object-cover ${mediumReady ? "visible" : "invisible"}`}
+        src={mediumURL}
+        onLoad={onLoadMedium}
+        alt={firstPhoto.attribution}
+        loading="lazy"
       />
       <div className="absolute lg:text-lg text-base text-center bg-[rgb(0,0,0,0.7)] h-full w-full flex text-white justify-center items-center p-4 opacity-0 group-hover:opacity-100 group-active:opacity-100">
         {name}
@@ -81,7 +83,7 @@ const ObservationsListView: FC<Props> = (props) => {
   }, [url, location.route])
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 bg-black w-full h-full">
       {observations.map((o) => (
         <ObservationItem key={o.id} observation={o} />
       ))}

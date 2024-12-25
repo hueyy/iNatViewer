@@ -8,6 +8,7 @@ import type { FC, TargetedEvent } from "preact/compat"
 import { useCallback, useEffect, useRef, useState } from "preact/hooks"
 import { type Observation, type ObservationPhoto, getAvifURL } from "../api"
 import useAvifHook from "../hooks/useAvifHook"
+import useHDReadyHook from "../hooks/useHDReady"
 import { getName, getOriginalPhoto } from "../utils"
 
 type CarouselSlideProps = {
@@ -17,24 +18,24 @@ type CarouselSlideProps = {
 
 const CarouselSlide: FC<CarouselSlideProps> = ({ className = "", photo }) => {
   const [useAvif] = useAvifHook()
-  const [hdReady, setHdReady] = useState(false)
+  const [hdReady, onLoad] = useHDReadyHook()
 
   const originalURL = getOriginalPhoto(photo.large_url)
   const hdURL = useAvif ? getAvifURL(originalURL, photo.id) : originalURL
-  const onLoad = useCallback(() => {
-    setHdReady(true)
-  }, [])
+
   return (
     <li
       className={`${className} snap-center bg-black w-screen h-screen shrink-0`}
     >
       <picture className="w-full h-full">
-        <img
-          id={`${photo.id}-preview`}
-          className={`w-full h-full object-contain ${hdReady ? "hidden" : ""}`}
-          src={photo.square_url}
-          alt={photo.attribution}
-        />
+        {hdReady ? null : (
+          <img
+            id={`${photo.id}-preview`}
+            className="w-full h-full object-contain"
+            src={photo.square_url}
+            alt={photo.attribution}
+          />
+        )}
         <img
           id={`${photo.id}`}
           className={`w-full h-full object-contain ${hdReady ? "visible" : "invisible"}`}
@@ -74,6 +75,29 @@ const CarouselControls: FC<CarouselControlsProps> = (props) => {
   )
 }
 
+type PhotoPreviewProps = {
+  className: string
+  photo: { photo: ObservationPhoto }
+}
+
+const PhotoPreview: FC<PhotoPreviewProps> = ({ className, photo }) => {
+  const newHash = `#${photo.photo.id}`
+
+  const onClick = useCallback(() => {
+    history.replaceState("", "", newHash)
+  }, [newHash])
+
+  return (
+    <a href={newHash} className="no-underline" onClick={onClick}>
+      <img
+        className={`${className} aspect-square`}
+        src={photo.photo.square_url}
+        alt={photo.photo.attribution}
+      />
+    </a>
+  )
+}
+
 type PhotoPreviewsProps = {
   className?: string
   photos: { photo: ObservationPhoto }[]
@@ -87,6 +111,7 @@ const PhotoPreviews: FC<PhotoPreviewsProps> = ({
 }) => {
   const selectedPhotoClassName = "w-8 h-8 md:w-14 md:h-14 opacity-100"
   const normalPhotoClassName = "w-6 h-6 md:w-10 md:h-10 opacity-70"
+
   return (
     <div
       className={`w-full flex justify-center items-center gap-2 md:gap-3 pb-4 ${className}`}
@@ -95,17 +120,11 @@ const PhotoPreviews: FC<PhotoPreviewsProps> = ({
         const photoClassName =
           index === currentIndex ? selectedPhotoClassName : normalPhotoClassName
         return (
-          <a
-            href={`#${photo.photo.id}`}
-            className="no-underline"
+          <PhotoPreview
             key={photo.photo.id}
-          >
-            <img
-              className={`${photoClassName} aspect-square`}
-              src={photo.photo.square_url}
-              alt={photo.photo.attribution}
-            />
-          </a>
+            className={photoClassName}
+            photo={photo}
+          />
         )
       })}
     </div>
@@ -174,11 +193,13 @@ const BottomDisplay: FC<BottomDisplayProps> = ({
 
   return (
     <div className={`w-full absolute bottom-0 left-0 quick-fade ${className}`}>
-      <PhotoPreviews
-        className={className}
-        photos={photos}
-        currentIndex={currentIndex}
-      />
+      {photos.length > 1 ? (
+        <PhotoPreviews
+          className={className}
+          photos={photos}
+          currentIndex={currentIndex}
+        />
+      ) : null}
       <div className="py-4 px-6 bg-black/60 text-white">
         <a
           className="text-white no-underline font-bold"

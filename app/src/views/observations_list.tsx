@@ -17,6 +17,7 @@ type ObservationItemProps = {
 const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
   const [useAvif] = useAvifHook()
   const [mediumReady, onLoadMedium] = useHDReadyHook()
+  const { query } = useLocation()
 
   const id = observation?.id
   const name = getName(observation)
@@ -31,7 +32,11 @@ const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
     : firstPhoto.medium_url
 
   return (
-    <a className="aspect-square relative group" href={`/observation/${id}`}>
+    <a
+      className="aspect-square relative group"
+      href={`/observation/${id}?url=${encodeURIComponent(encodeURIComponent(query.url))}`}
+      id={`${id}`}
+    >
       {mediumReady ? null : (
         <img
           className="absolute w-full h-full object-cover"
@@ -64,7 +69,7 @@ type Props = {
 const ObservationsListView: FC<Props> = (props) => {
   const url = props?.query?.url
   const [observations, setObservations] = useState<Observation[]>([])
-  const location = useLocation()
+  const { route } = useLocation()
 
   useEffect(() => {
     if (
@@ -72,15 +77,20 @@ const ObservationsListView: FC<Props> = (props) => {
       url === null ||
       !url.startsWith(initialString)
     ) {
-      location.route("/", true)
-    } else {
-      const jsonURL = url.replace(initialString, `${initialString}.json`)
-      ;(async () => {
-        const data = await getObservationsbyURL(jsonURL)
-        setObservations(data)
-      })()
+      return route("/", true)
     }
-  }, [url, location.route])
+
+    const jsonURL = url.replace(initialString, `${initialString}.json`)
+    ;(async () => {
+      const data = await getObservationsbyURL(jsonURL)
+      setObservations(data)
+      if (location.hash.length > 0) {
+        setTimeout(() => {
+          document.getElementById(location.hash.slice(1))?.scrollIntoView()
+        }, 0)
+      }
+    })()
+  }, [url, route])
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 bg-black w-full h-full">

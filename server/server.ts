@@ -68,36 +68,6 @@ fastify.get(
   },
 )
 
-// fastify.post("/api/convert_image_file/", async (request, response) => {
-//   const formData = await request.formData()
-//   const image = formData.get("image")
-//   const id = formData.get("id")
-
-//   if (typeof id !== "string" || !image) {
-//     response.code(400)
-//     return "Invalid input"
-//   }
-
-//   const newFilePath = `${OUTPUT_FOLDER}/${id}.avif`
-//   const alreadyExists = fs.existsSync(newFilePath)
-
-//   if (alreadyExists) {
-//     response.code(301).redirect(`/images/${newFileName}.avif`)
-//     return
-//   }
-
-//   const inputBuffer = await (image as File).arrayBuffer()
-
-//   if (!fs.existsSync(OUTPUT_FOLDER)) {
-//     fs.mkdirSync(OUTPUT_FOLDER)
-//   }
-
-//   await sharp(inputBuffer).avif({ quality: 70 }).toFile(newFilePath)
-
-//   response.code(301).redirect(`/images/${newFileName}.avif`)
-//   return
-// })
-
 fastify.listen({ port: PORT }, (err, address) => {
   if (err) {
     throw err

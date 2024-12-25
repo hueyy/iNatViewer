@@ -1,5 +1,3 @@
-import axios from "axios"
-
 export type ObservationPhoto = {
   attribution: string
   created_at: string
@@ -38,25 +36,16 @@ export type Observation = {
 export const getObservationsbyURL = async (
   url: string,
 ): Promise<Observation[]> => {
-  const { data } = await axios.get(url)
+  const data = await (await fetch(url, { cache: "force-cache" })).json()
   return data
 }
 
 export const getObservationByURL = async (
   url: string,
 ): Promise<Observation> => {
-  const { data } = await axios.get(url)
+  const data = await (await fetch(url, { cache: "force-cache" })).json()
   return data
 }
 
 export const getAvifURL = (url: string, id: number): string =>
   `/api/convert_image_url/?url=${url}&id=${id}`
-
-// export const getAvifURL = async (url: string, id: number): Promise<string> => {
-//   const { data } = await axios.post("/api/convert_image_url/", {
-//     url,
-//     id: `${id}`,
-//   })
-//   const path = data.path
-//   return path
-// }

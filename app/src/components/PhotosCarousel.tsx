@@ -14,14 +14,24 @@ import { getName, getOriginalPhoto } from "../utils"
 type CarouselSlideProps = {
   className?: string
   photo: ObservationPhoto
+  onLoaded: () => void
 }
 
-const CarouselSlide: FC<CarouselSlideProps> = ({ className = "", photo }) => {
+const CarouselSlide: FC<CarouselSlideProps> = ({
+  className = "",
+  photo,
+  onLoaded,
+}) => {
   const [useAvif] = useAvifHook()
-  const [hdReady, onLoad] = useHDReadyHook()
+  const [hdReady, onHDReady] = useHDReadyHook()
 
   const originalURL = getOriginalPhoto(photo.large_url)
   const hdURL = useAvif ? getAvifURL(originalURL, photo.id) : originalURL
+
+  const onLoad = useCallback(() => {
+    onHDReady()
+    onLoaded()
+  }, [onHDReady, onLoaded])
 
   return (
     <li
@@ -234,9 +244,10 @@ const BottomDisplay: FC<BottomDisplayProps> = ({
 
 type Props = {
   observation: Observation
+  onLoaded: () => void
 }
 
-const PhotosCarousel: FC<Props> = ({ observation }) => {
+const PhotosCarousel: FC<Props> = ({ observation, onLoaded }) => {
   if (typeof observation === "undefined" || observation === null) {
     console.error("PhotosCarousel: no observation provided")
     return null
@@ -255,6 +266,7 @@ const PhotosCarousel: FC<Props> = ({ observation }) => {
   const toggleControlsVisible = useCallback(() => {
     setControlsVisible((c) => !c)
   }, [])
+
   const visibilityClass = controlsVisible
     ? "visible opacity-100"
     : "invisible opacity-0"
@@ -329,7 +341,7 @@ const PhotosCarousel: FC<Props> = ({ observation }) => {
         ref={scrollDivRef}
       >
         {photos.map((p) => (
-          <CarouselSlide key={p.photo.id} photo={p.photo} />
+          <CarouselSlide key={p.photo.id} photo={p.photo} onLoaded={onLoaded} />
         ))}
       </ol>
       <CarouselControls

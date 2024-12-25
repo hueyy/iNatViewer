@@ -1,5 +1,5 @@
 import type { FC } from "preact/compat"
-import { useEffect, useState } from "preact/hooks"
+import { useCallback, useEffect, useState } from "preact/hooks"
 import { type Observation, getObservationByURL } from "../api"
 import PhotosCarousel from "../components/PhotosCarousel"
 import { LOADING_MESSAGES } from "../utils/Constants"
@@ -27,7 +27,7 @@ const LoadingScreen = () => {
   }, [])
 
   return (
-    <div className="bg-black w-screen h-screen flex justify-center items-center text-white font-black text-2xl">
+    <div className="bg-[rgba(0,0,0,0.6)] z-50 w-full py-12 px-4 lg:px-6 fixed top-[40%] flex justify-center items-center text-white font-black text-2xl">
       {loadingMessage}...
       <svg
         class="animate-spin ml-4 h-8 w-8 text-white"
@@ -63,8 +63,13 @@ type Props = {
 const ObservationIndividualView: FC<Props> = (props) => {
   const id = props?.params?.id
   const [observation, setObservation] = useState({} as Observation)
+  const [loading, setLoading] = useState(true)
 
-  const stillLoading =
+  const onLoaded = useCallback(() => {
+    setLoading(false)
+  }, [])
+
+  const observationStillLoading =
     typeof observation?.id === "undefined" || observation?.id === null
 
   useEffect(() => {
@@ -79,14 +84,12 @@ const ObservationIndividualView: FC<Props> = (props) => {
     }
   }, [id])
 
-  if (stillLoading) {
-    return <LoadingScreen />
-  }
-
   return (
     <div>
-      {observation?.observation_photos.length > 0 ? (
-        <PhotosCarousel observation={observation} />
+      {loading ? <LoadingScreen /> : null}
+      {!observationStillLoading &&
+      observation?.observation_photos.length > 0 ? (
+        <PhotosCarousel observation={observation} onLoaded={onLoaded} />
       ) : null}
     </div>
   )

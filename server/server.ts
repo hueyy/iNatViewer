@@ -1,21 +1,18 @@
 import fs from "node:fs"
-import fastifyMultipart from "@fastify/multipart"
-import Fastify from "fastify"
+import fastifyCaching from "@fastify/caching"
+import Fastify, { type FastifyRequest } from "fastify"
 import sharp from "sharp"
 
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 8001
+const OUTPUT_FOLDER = process.env.OUTPUT_FOLDER || "app/public/images"
+const ETAG_CACHE_TIME = 31557600000 // 1 year
 
 const fastify = Fastify({
   logger: true,
 })
 
-fastify.register(fastifyMultipart, {
-  limits: {
-    files: 1,
-    fields: 1,
-    fileSize: 3000000, // 3MB
-  },
-  attachFieldsToBody: true,
+fastify.register(fastifyCaching, {
+  privacy: fastifyCaching.privacy.PUBLIC,
 })
 
 fastify.get("/api/", async (_, response) => {
@@ -23,36 +20,81 @@ fastify.get("/api/", async (_, response) => {
   return { hello: "world" }
 })
 
-fastify.post("/api/convert_image/", async (request, response) => {
-  const formData = await request.formData()
-  const image = formData.get("image")
-  const id = formData.get("id")
+type ConvertImageUrlBody = {
+  url: string
+  id: string
+}
 
-  if (typeof id !== "string" || !image) {
-    response.code(400)
-    return "Invalid input"
-  }
+fastify.get(
+  "/api/convert_image_url/",
+  async (
+    request: FastifyRequest<{ Querystring: ConvertImageUrlBody }>,
+    response,
+  ) => {
+    const url = request?.query?.url
+    const id = request?.query?.id
 
-  const outputFolder = "app/dist/images"
-  const newFilePath = `${outputFolder}/${id}.avif`
-  const alreadyExists = fs.existsSync(newFilePath)
+    if (
+      typeof id !== "string" ||
+      typeof url !== "string" ||
+      !url.startsWith("https://inaturalist-open-data.s3.amazonaws.com/photos/")
+      // super secure 🔒
+    ) {
+      response.code(400)
+      return "Invalid input"
+    }
 
-  if (alreadyExists) {
-    response.type("application/json").code(200)
-    return { path: `/images/${id}.avif` }
-  }
+    const newFileName = url.split("/").slice(-2).join("-")
+    const newFilePath = `${OUTPUT_FOLDER}/${newFileName}.avif`
+    const alreadyExists = fs.existsSync(newFilePath)
 
-  const inputBuffer = await (image as File).arrayBuffer()
+    if (!alreadyExists) {
+      const inputBuffer = await (await fetch(url)).arrayBuffer()
 
-  if (!fs.existsSync(outputFolder)) {
-    fs.mkdirSync(outputFolder)
-  }
+      if (!fs.existsSync(OUTPUT_FOLDER)) {
+        fs.mkdirSync(OUTPUT_FOLDER)
+      }
 
-  await sharp(inputBuffer).avif({ quality: 70 }).toFile(newFilePath)
+      await sharp(inputBuffer).avif({ quality: 70 }).toFile(newFilePath)
+    }
 
-  response.type("application/json").code(200)
-  return { path: `/images/${id}.avif` }
-})
+    response
+      .etag(newFileName, ETAG_CACHE_TIME)
+      .code(301)
+      .redirect(`/images/${newFileName}.avif`)
+    return
+  },
+)
+
+// fastify.post("/api/convert_image_file/", async (request, response) => {
+//   const formData = await request.formData()
+//   const image = formData.get("image")
+//   const id = formData.get("id")
+
+//   if (typeof id !== "string" || !image) {
+//     response.code(400)
+//     return "Invalid input"
+//   }
+
+//   const newFilePath = `${OUTPUT_FOLDER}/${id}.avif`
+//   const alreadyExists = fs.existsSync(newFilePath)
+
+//   if (alreadyExists) {
+//     response.code(301).redirect(`/images/${newFileName}.avif`)
+//     return
+//   }
+
+//   const inputBuffer = await (image as File).arrayBuffer()
+
+//   if (!fs.existsSync(OUTPUT_FOLDER)) {
+//     fs.mkdirSync(OUTPUT_FOLDER)
+//   }
+
+//   await sharp(inputBuffer).avif({ quality: 70 }).toFile(newFilePath)
+
+//   response.code(301).redirect(`/images/${newFileName}.avif`)
+//   return
+// })
 
 fastify.listen({ port: PORT }, (err, address) => {
   if (err) {

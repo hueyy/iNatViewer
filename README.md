@@ -6,8 +6,10 @@ iNatViewer is a simple viewer for iNaturalist observations and images. It is sti
 
 ```bash
 devenv shell
-dev
+devenv up
 ```
+
+The app will then be accessible at [`http://localhost:8000`](http://localhost:8000).
 
 ## Deployment
 

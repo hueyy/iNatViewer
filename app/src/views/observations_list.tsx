@@ -2,7 +2,8 @@ import { useLocation } from "preact-iso"
 import type { FC } from "preact/compat"
 import { useEffect, useState } from "preact/hooks"
 import type { Observation } from "../api"
-import { getObservationsbyURL } from "../api"
+import { getAvifURL, getObservationsbyURL } from "../api"
+import useAvifHook from "../hooks/useAvifHook"
 import { getName } from "../utils"
 
 const initialString = "https://www.inaturalist.org/observations"
@@ -13,18 +14,38 @@ type ObservationItemProps = {
 }
 
 const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
+  const [useAvif] = useAvifHook()
+
   const id = observation?.id
   const name = getName(observation)
-  const image = observation.photos[0].large_url
   const location = observation.place_guess
+  const firstPhoto = observation.photos[0]
+
+  const smallURL = useAvif
+    ? getAvifURL(firstPhoto.small_url, firstPhoto.id)
+    : firstPhoto.small_url
+  const mediumURL = useAvif
+    ? getAvifURL(firstPhoto.medium_url, firstPhoto.id)
+    : firstPhoto.medium_url
+  const largeURL = useAvif
+    ? getAvifURL(firstPhoto.large_url, firstPhoto.id)
+    : firstPhoto.large_url
 
   return (
-    <a
-      className="aspect-square bg-no-repeat bg-cover group"
-      href={`/observation/${id}`}
-      style={{ backgroundImage: `url(${image})` }}
-    >
-      <div className="lg:text-lg text-base text-center bg-[rgb(0,0,0,0.7)] h-full w-full flex text-white justify-center items-center p-4 opacity-0 group-hover:opacity-100 group-active:opacity-100">
+    <a className="aspect-square relative group" href={`/observation/${id}`}>
+      <div
+        className="absolute w-full h-full bg-no-repeat bg-cover lg:hidden"
+        style={{ backgroundImage: `url(${smallURL})` }}
+      />
+      <div
+        className="absolute w-full h-full bg-no-repeat bg-cover hidden lg:block 2xl:hidden"
+        style={{ backgroundImage: `url(${mediumURL})` }}
+      />
+      <div
+        className="absolute w-full h-full bg-no-repeat bg-cover hidden 2xl:block"
+        style={{ backgroundImage: `url(${largeURL})` }}
+      />
+      <div className="absolute lg:text-lg text-base text-center bg-[rgb(0,0,0,0.7)] h-full w-full flex text-white justify-center items-center p-4 opacity-0 group-hover:opacity-100 group-active:opacity-100">
         {name}
         {location ? ` in ${location}` : null}
       </div>
@@ -60,31 +81,10 @@ const ObservationsListView: FC<Props> = (props) => {
   }, [url, location.route])
 
   return (
-    <div>
-      <form
-        className="py-2 px-4 flex flex-col lg:flex-row items-center"
-        action="/observations"
-        method="GET"
-      >
-        <input
-          className="w-full max-w-prose p-2 border border-gray-500"
-          name="url"
-          type="text"
-          placeholder="URL"
-          value={url}
-        />
-        <button
-          className="my-4 py-2 px-4 bg-gray-200 border border-gray-700 rounded"
-          type="submit"
-        >
-          VIEW OBSERVATIONS
-        </button>
-      </form>
-      <div className="grid grid-cols-2 lg:grid-cols-4">
-        {observations.map((o) => (
-          <ObservationItem key={o.id} observation={o} />
-        ))}
-      </div>
+    <div className="grid grid-cols-2 lg:grid-cols-4">
+      {observations.map((o) => (
+        <ObservationItem key={o.id} observation={o} />
+      ))}
     </div>
   )
 }

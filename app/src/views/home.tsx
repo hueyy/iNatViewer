@@ -1,8 +1,26 @@
-import type { FC } from "preact/compat"
+import { type FC, type JSX, useCallback } from "preact/compat"
+import useAvifHook from "../hooks/useAvifHook"
 
 const HomeView: FC = () => {
+  const [useAvif, updateAvif] = useAvifHook()
+
+  const onUseAvifChange = useCallback(
+    (event: JSX.TargetedEvent<HTMLInputElement, Event>) => {
+      if (event?.target === null) {
+        return
+      }
+      const eventTarget = event?.target as HTMLInputElement
+      if (eventTarget?.checked === null) {
+        return
+      }
+      const value = eventTarget.checked
+      updateAvif(value)
+    },
+    [updateAvif],
+  )
+
   return (
-    <div>
+    <div className="lg:max-w-screen-xl lg:mx-auto mx-4">
       <h1 className="text-xl font-black text-center mt-8 mb-6">iNatViewer</h1>
       <form
         className="p-4 flex flex-col items-center"
@@ -16,6 +34,21 @@ const HomeView: FC = () => {
           placeholder="URL"
           value="https://www.inaturalist.org/observations?q=huey.xyz&search_on=tags&user_id=hueyl&per_page=200"
         />
+        <div className="w-full max-w-prose flex gap-4 my-4">
+          <input
+            type="checkbox"
+            id="useAvif"
+            onChange={onUseAvifChange}
+            checked={useAvif}
+          />
+          <label for="useAvif">
+            Load images in AVIF format for smaller file size (uncheck this&nbsp;
+            <a href="https://caniuse.com/avif">
+              if you are using an old web browser such as IE11
+            </a>
+            )
+          </label>
+        </div>
         <button
           className="my-4 py-2 px-4 bg-gray-200 border border-gray-700 rounded"
           type="submit"
@@ -29,9 +62,12 @@ const HomeView: FC = () => {
       </form>
       <section className="container mx-auto">
         <h2 className="text-xl font-bold">What is this?</h2>
-        <p>iNatViewer is...</p>
+        <p>
+          iNatViewer lets you view images in iNaturalist observations in a
+          simple, aesthetically-pleasing photo gallery.{" "}
+        </p>
       </section>
-      <section className="mt-6 container mx-auto" id="how-to-use">
+      <section className="mt-6 container mx-auto mb-12" id="how-to-use">
         <h2 className="text-xl font-bold">How do I use this?</h2>
         <p>
           Visit the&nbsp;

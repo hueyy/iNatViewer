@@ -3,7 +3,7 @@ import axios from "axios"
 export type ObservationPhoto = {
   attribution: string
   created_at: string
-  id: string
+  id: number
   large_url: string
   license_code: string
   small_url: string
@@ -48,3 +48,15 @@ export const getObservationByURL = async (
   const { data } = await axios.get(url)
   return data
 }
+
+export const getAvifURL = (url: string, id: number): string =>
+  `/api/convert_image_url/?url=${url}&id=${id}`
+
+// export const getAvifURL = async (url: string, id: number): Promise<string> => {
+//   const { data } = await axios.post("/api/convert_image_url/", {
+//     url,
+//     id: `${id}`,
+//   })
+//   const path = data.path
+//   return path
+// }

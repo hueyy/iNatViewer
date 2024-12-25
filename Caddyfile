@@ -1,0 +1,21 @@
+:80 {
+	encode zstd gzip
+	log {
+		output stdout
+		format console
+	}
+
+	handle_path /healthcheck {
+		respond "OK"
+	}
+
+	handle /api/* {
+		reverse_proxy localhost:8001
+	}
+
+	handle {
+		root public
+		try_files {path} /index.html
+		file_server
+	}
+}

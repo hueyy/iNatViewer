@@ -1,0 +1,8 @@
+services:
+  inatviewer-production:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:80"
+    restart: unless-stopped

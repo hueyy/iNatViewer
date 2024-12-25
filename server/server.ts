@@ -3,7 +3,9 @@ import fastifyCaching from "@fastify/caching"
 import Fastify, { type FastifyRequest } from "fastify"
 import sharp from "sharp"
 
-const PORT = process.env.PORT ? Number.parseInt(process.env.PORT, 10) : 8001
+const PORT = process.env.BACKEND_PORT
+  ? Number.parseInt(process.env.BACKEND_PORT, 10)
+  : 8001
 const OUTPUT_FOLDER = process.env.OUTPUT_FOLDER || "app/public/images"
 const ETAG_CACHE_TIME = 31557600000 // 1 year
 

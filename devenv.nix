@@ -1,6 +1,8 @@
 { pkgs, lib, config, inputs, ... }:
 
 {
+  name = "inatviewer";
+
   packages = [ pkgs.git pkgs.act ];
 
   languages.javascript = {
@@ -53,5 +55,6 @@
     biome = {
       enable = true;
     };
+    nixpkgs-fmt.enable = true;
   };
 }

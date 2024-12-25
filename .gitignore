@@ -23,6 +23,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.clj-kondo
+.lsp
 
 # Local Netlify folder
 .netlify
@@ -38,3 +40,4 @@ devenv.local.nix
 .pre-commit-config.yaml
 
 app/public/images
+build/

@@ -25,10 +25,10 @@ const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
   const firstPhoto = observation.photos[0]
 
   const smallURL = useAvif
-    ? getAvifURL(firstPhoto.small_url, firstPhoto.id)
+    ? getAvifURL(firstPhoto.small_url)
     : firstPhoto.small_url
   const mediumURL = useAvif
-    ? getAvifURL(firstPhoto.medium_url, firstPhoto.id)
+    ? getAvifURL(firstPhoto.medium_url)
     : firstPhoto.medium_url
 
   return (

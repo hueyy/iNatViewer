@@ -47,5 +47,5 @@ export const getObservationByURL = async (
   return data
 }
 
-export const getAvifURL = (url: string, id: number): string =>
-  `/api/convert_image_url/?url=${url}&id=${id}`
+export const getAvifURL = (url: string): string =>
+  `/api/convert_image_url/?url=${url}`

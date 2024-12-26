@@ -19,7 +19,7 @@ const CarouselSlide: FC<CarouselSlideProps> = ({
   const [hdReady, onHDReady] = useHDReadyHook()
 
   const originalURL = getOriginalPhoto(photo.large_url)
-  const hdURL = useAvif ? getAvifURL(originalURL, photo.id) : originalURL
+  const hdURL = useAvif ? getAvifURL(originalURL) : originalURL
 
   const onLoad = useCallback(() => {
     onHDReady()

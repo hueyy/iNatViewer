@@ -8,3 +8,8 @@ services:
     volumes: 
       - ./app/public/images:/srv/public/images
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: 1
+          memory: 1024M

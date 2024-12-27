@@ -29,6 +29,7 @@ const CarouselSlide: FC<CarouselSlideProps> = ({
   return (
     <li
       className={`${className} snap-center bg-black w-screen h-screen shrink-0`}
+      id={`${photo.id}`}
     >
       <picture className="w-full h-full">
         {hdReady ? null : (
@@ -40,7 +41,6 @@ const CarouselSlide: FC<CarouselSlideProps> = ({
           />
         )}
         <img
-          id={`${photo.id}`}
           className={`w-full h-full object-contain ${hdReady ? "visible" : "invisible"}`}
           src={hdURL}
           alt={photo.attribution}

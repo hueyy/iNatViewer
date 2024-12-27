@@ -33,6 +33,11 @@ export type Observation = {
   }[]
 }
 
+export type iNatViewerPhoto = {
+  observation: Observation
+  photo: ObservationPhoto
+}
+
 export const getObservationsbyURL = async (
   url: string,
 ): Promise<Observation[]> => {

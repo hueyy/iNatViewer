@@ -1,159 +1,59 @@
-import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/solid"
-import type { FC, TargetedEvent } from "preact/compat"
-import { useCallback, useEffect, useRef, useState } from "preact/hooks"
-import type { Observation } from "../api"
+import type { FC } from "preact/compat"
+import type { Observation, iNatViewerPhoto } from "../api"
+import useCarouselScroll from "../hooks/useCarouselScroll"
+import BottomDisplay from "./BottomDisplay"
 import CarouselControls from "./CarouselControls"
 import CarouselSlide from "./CarouselSlide"
-import LocationLink from "./LocationLink"
-import ObservationName from "./ObservationName"
-import PhotoPreviews from "./PhotoPreviews"
-
-type BottomDisplayProps = {
-  className?: string
-  observation: Observation
-  currentIndex: number
-}
-
-const BottomDisplay: FC<BottomDisplayProps> = ({
-  className,
-  observation,
-  currentIndex,
-}) => {
-  const rawTimestamp = observation.time_observed_at
-  const timestamp = `${(new Date(rawTimestamp)).toDateString()}, ${(new Date(rawTimestamp)).toLocaleTimeString()}`
-  const locationString = observation.place_guess
-  const { latitude, longitude } = observation
-  const { observation_photos: photos } = observation
-
-  return (
-    <div className={`w-full absolute bottom-0 left-0 quick-fade ${className}`}>
-      {photos.length > 1 ? (
-        <PhotoPreviews
-          className={className}
-          photos={photos}
-          currentIndex={currentIndex}
-        />
-      ) : null}
-      <div className="py-4 px-6 bg-black/60 text-white">
-        <a
-          className="text-white no-underline font-bold"
-          href={`https://www.inaturalist.org/observations/${observation.id}`}
-        >
-          <ObservationName observation={observation} />
-        </a>
-        <div className="text-sm mt-2">
-          <div className="flex" title={rawTimestamp}>
-            <div className="w-6">
-              <CalendarDaysIcon className="size-4" />
-            </div>
-            <div>{timestamp}</div>
-          </div>
-          <div className="flex mt-1">
-            <div className="w-6">
-              <MapPinIcon className="size-4" />
-            </div>
-            <div>
-              <LocationLink
-                location={locationString}
-                lat={latitude}
-                long={longitude}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 type Props = {
-  observation: Observation
+  observations: Observation[]
   onLoaded: () => void
 }
 
-const PhotosCarousel: FC<Props> = ({ observation, onLoaded }) => {
-  if (typeof observation === "undefined" || observation === null) {
+const PhotosCarousel: FC<Props> = ({ observations, onLoaded }) => {
+  if (
+    typeof observations === "undefined" ||
+    observations === null ||
+    observations.length === 0
+  ) {
     console.error("PhotosCarousel: no observation provided")
     return null
   }
 
-  const { observation_photos: photos } = observation
+  if (observations.length === 1) {
+    const { observation_photos: photos } = observations[0]
 
-  if (typeof photos === "undefined" || photos === null || photos.length === 0) {
-    console.error("PhotosCarousel: no observation_photos provided")
-    return null
+    if (
+      typeof photos === "undefined" ||
+      photos === null ||
+      photos.length === 0
+    ) {
+      console.error("PhotosCarousel: no observation_photos provided")
+      return null
+    }
   }
 
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const photos = observations.reduce((prev, cur) => {
+    prev.push(
+      ...cur.photos.map((p) => ({
+        observation: cur,
+        photo: p,
+      })),
+    )
+    return prev
+  }, [] as iNatViewerPhoto[])
 
-  const [controlsVisible, setControlsVisible] = useState(true)
-  const toggleControlsVisible = useCallback(() => {
-    setControlsVisible((c) => !c)
-  }, [])
+  const {
+    controlsVisible,
+    toggleControlsVisible,
+    onScroll,
+    scrollDivRef,
+    currentIndex,
+  } = useCarouselScroll(photos.length)
 
   const visibilityClass = controlsVisible
     ? "visible opacity-100"
     : "invisible opacity-0"
-
-  const onScroll = useCallback(
-    (e: TargetedEvent) => {
-      if (e.target === null) {
-        return
-      }
-      const { scrollLeft, scrollWidth } = e.target as EventTarget & {
-        scrollLeft: number
-        scrollWidth: number
-      }
-      const width = Math.round(scrollWidth / photos.length)
-
-      if (
-        scrollLeft === 0 ||
-        scrollWidth % scrollLeft === 0 ||
-        Math.abs(width - (scrollWidth % scrollLeft)) / width < 0.05
-      ) {
-        const scrollPosition = Math.round(
-          scrollLeft / (scrollWidth / photos.length),
-        )
-        setCurrentIndex(scrollPosition)
-      }
-    },
-    [photos.length],
-  )
-
-  const scrollDivRef = useRef<HTMLOListElement>(null)
-
-  useEffect(() => {
-    document.addEventListener("wheel", (e) => {
-      const wheelDelta = (e as WheelEvent & { wheelDelta: number }).wheelDelta
-      const delta = Math.max(-1, Math.min(1, wheelDelta))
-      if (scrollDivRef.current) {
-        scrollDivRef.current.scrollLeft -=
-          (delta * scrollDivRef.current.clientWidth) / 3
-      }
-      e.preventDefault()
-    })
-
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (!scrollDivRef.current || e.repeat === true) {
-        return
-      }
-
-      const { key } = e
-      switch (key) {
-        case "ArrowUp":
-        case "ArrowLeft":
-          scrollDivRef.current.scrollLeft -= scrollDivRef.current.clientWidth
-          break
-
-        case "ArrowDown":
-        case "ArrowRight":
-          scrollDivRef.current.scrollLeft += scrollDivRef.current.clientWidth
-          break
-      }
-    }
-
-    document.addEventListener("keydown", onKeyDown)
-  }, [])
 
   return (
     <div className="w-full h-screen">
@@ -174,8 +74,8 @@ const PhotosCarousel: FC<Props> = ({ observation, onLoaded }) => {
       />
       <BottomDisplay
         className={visibilityClass}
-        observation={observation}
         currentIndex={currentIndex}
+        photos={photos}
       />
     </div>
   )

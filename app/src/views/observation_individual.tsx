@@ -1,8 +1,16 @@
+import { useLocation } from "preact-iso"
 import type { FC } from "preact/compat"
 import { useCallback, useEffect, useState } from "preact/hooks"
-import { type Observation, getObservationByURL } from "../api"
+import {
+  type Observation,
+  getObservationByURL,
+  getObservationsbyURL,
+} from "../api"
 import PhotosCarousel from "../components/PhotosCarousel"
 import { LOADING_MESSAGES } from "../utils/Constants"
+
+const initialString = "https://www.inaturalist.org/observations"
+// TODO: accept variations to URL and make this more robust
 
 const LoadingScreen = () => {
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
@@ -62,35 +70,49 @@ type Props = {
 
 const ObservationIndividualView: FC<Props> = (props) => {
   const id = props?.params?.id
-  const [observation, setObservation] = useState({} as Observation)
+  const [observations, setObservations] = useState([] as Observation[])
   const [loading, setLoading] = useState(true)
+  const { query } = useLocation()
 
   const onLoaded = useCallback(() => {
     setLoading(false)
   }, [])
 
   const observationStillLoading =
-    typeof observation?.id === "undefined" || observation?.id === null
+    observations.length === 0 ||
+    typeof observations[0]?.id === "undefined" ||
+    observations[0]?.id === null
 
   useEffect(() => {
     if (typeof id === "undefined" || id === null || id.length === 0) {
       window.history.back()
+    }
+    if (typeof query?.url === "string") {
+      // Load all observations
+      const jsonURL = decodeURIComponent(query?.url).replace(
+        initialString,
+        `${initialString}.json`,
+      )
+      ;(async () => {
+        const data = await getObservationsbyURL(jsonURL)
+        setObservations(data)
+      })()
     } else {
+      // Load just 1 observation
       const observationURL = `https://www.inaturalist.org/observations/${id}.json`
       ;(async () => {
         const data = await getObservationByURL(observationURL)
-        setObservation(data)
+        setObservations([data])
       })()
     }
-  }, [id])
+  }, [id, query?.url])
 
   return (
     <div>
       {loading ? <LoadingScreen /> : null}
-      {!observationStillLoading &&
-      observation?.observation_photos.length > 0 ? (
-        <PhotosCarousel observation={observation} onLoaded={onLoaded} />
-      ) : null}
+      {!observationStillLoading && (
+        <PhotosCarousel observations={observations} onLoaded={onLoaded} />
+      )}
     </div>
   )
 }

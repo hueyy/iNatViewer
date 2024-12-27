@@ -33,9 +33,15 @@ const CarouselControls: FC<CarouselControlsProps> = (props) => {
     <div
       className={`w-full absolute top-0 left-0 flex justify-between py-4 px-6 text-white quick-fade ${className}`}
     >
-      <ArrowUturnLeftIcon className="size-6 cursor-pointer" onClick={goBack} />
+      <div className="p-2 bg-black/60 rounded-xl">
+        <ArrowUturnLeftIcon
+          className="size-6 cursor-pointer"
+          onClick={goBack}
+        />
+      </div>
+
       <a
-        className="text-white no-underline"
+        className="text-white no-underline p-2 bg-black/60 rounded-xl"
         href={`https://www.inaturalist.org/photos/${photo.id}`}
       >
         <InformationCircleIcon className="size-6" />

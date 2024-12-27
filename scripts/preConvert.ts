@@ -17,9 +17,11 @@ const init = async () => {
     const observations = await fetchObservations(url)
     for (const observation of observations) {
       for (const image of observation.photos) {
-        console.log(await convertImage(image.small_url))
-        console.log(await convertImage(image.medium_url))
-        console.log(await convertImage(getOriginalPhoto(image.large_url)))
+        console.log((await convertImage(image.small_url)).path)
+        console.log((await convertImage(image.medium_url)).path)
+        console.log(
+          (await convertImage(getOriginalPhoto(image.large_url))).path,
+        )
       }
     }
   }

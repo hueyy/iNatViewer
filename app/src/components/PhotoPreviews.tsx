@@ -15,7 +15,11 @@ const PhotoPreview: FC<PhotoPreviewProps> = ({ className, photo }) => {
   }, [newHash])
 
   return (
-    <a href={newHash} className="no-underline" onClick={onClick}>
+    <a
+      href={newHash}
+      className="no-underline shadow-2xl border border-black/20"
+      onClick={onClick}
+    >
       <img
         className={`${className} aspect-square`}
         src={photo.photo.square_url}

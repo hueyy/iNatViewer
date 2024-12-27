@@ -10,13 +10,16 @@ export const convertImage = async (
   const newFilePath = `${OUTPUT_FOLDER}/${newFileName}.avif`
 
   if (!fs.existsSync(newFilePath)) {
-    const inputBuffer = await (await fetch(url)).arrayBuffer()
+    try {
+      await sharp(fs.readFileSync(newFilePath)).stats()
 
-    if (!fs.existsSync(OUTPUT_FOLDER)) {
-      fs.mkdirSync(OUTPUT_FOLDER)
+      if (!fs.existsSync(OUTPUT_FOLDER)) {
+        fs.mkdirSync(OUTPUT_FOLDER)
+      }
+    } catch (error) {
+      const inputBuffer = await (await fetch(url)).arrayBuffer()
+      await sharp(inputBuffer).avif({ quality: 85 }).toFile(newFilePath)
     }
-
-    await sharp(inputBuffer).avif({ quality: 85 }).toFile(newFilePath)
   }
   return {
     path: `/images/${newFileName}.avif`,

@@ -3,9 +3,9 @@ import type { FC } from "preact/compat"
 import { useEffect, useState } from "preact/hooks"
 import type { Observation } from "../api"
 import { getAvifURL, getObservationsbyURL } from "../api"
+import ObservationName from "../components/ObservationName"
 import useAvifHook from "../hooks/useAvifHook"
 import useHDReadyHook from "../hooks/useHDReady"
-import { getName } from "../utils"
 
 const initialString = "https://www.inaturalist.org/observations"
 // TODO: accept variations to URL and make this more robust
@@ -20,7 +20,6 @@ const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
   const { query } = useLocation()
 
   const id = observation?.id
-  const name = getName(observation)
   const location = observation.place_guess
   const firstPhoto = observation.photos[0]
 
@@ -53,8 +52,12 @@ const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
         loading="lazy"
       />
       <div className="absolute lg:text-lg text-base text-center bg-[rgb(0,0,0,0.7)] h-full w-full flex text-white justify-center items-center p-4 opacity-0 group-hover:opacity-100 group-active:opacity-100">
-        {name}
-        {location ? ` in ${location}` : null}
+        <span>
+          <strong className="font-bold">
+            <ObservationName observation={observation} />
+          </strong>
+          {location ? ` in ${location}` : null}
+        </span>
       </div>
     </a>
   )

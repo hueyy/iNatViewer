@@ -2,10 +2,10 @@ import { CalendarDaysIcon, MapPinIcon } from "@heroicons/react/24/solid"
 import type { FC, TargetedEvent } from "preact/compat"
 import { useCallback, useEffect, useRef, useState } from "preact/hooks"
 import type { Observation } from "../api"
-import { getName } from "../utils"
 import CarouselControls from "./CarouselControls"
 import CarouselSlide from "./CarouselSlide"
 import LocationLink from "./LocationLink"
+import ObservationName from "./ObservationName"
 import PhotoPreviews from "./PhotoPreviews"
 
 type BottomDisplayProps = {
@@ -19,8 +19,6 @@ const BottomDisplay: FC<BottomDisplayProps> = ({
   observation,
   currentIndex,
 }) => {
-  const name = getName(observation)
-
   const rawTimestamp = observation.time_observed_at
   const timestamp = `${(new Date(rawTimestamp)).toDateString()}, ${(new Date(rawTimestamp)).toLocaleTimeString()}`
   const locationString = observation.place_guess
@@ -41,7 +39,7 @@ const BottomDisplay: FC<BottomDisplayProps> = ({
           className="text-white no-underline font-bold"
           href={`https://www.inaturalist.org/observations/${observation.id}`}
         >
-          {name}
+          <ObservationName observation={observation} />
         </a>
         <div className="text-sm mt-2">
           <div className="flex" title={rawTimestamp}>

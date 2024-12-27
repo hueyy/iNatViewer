@@ -96,6 +96,11 @@ const ObservationIndividualView: FC<Props> = (props) => {
       ;(async () => {
         const data = await getObservationsbyURL(jsonURL)
         setObservations(data)
+        if (location.hash.length > 0) {
+          setTimeout(() => {
+            document.getElementById(location.hash.slice(1))?.scrollIntoView()
+          }, 0)
+        }
       })()
     } else {
       // Load just 1 observation

@@ -33,7 +33,7 @@ const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
   return (
     <a
       className="aspect-square relative group"
-      href={`/observation/${id}?url=${encodeURIComponent(encodeURIComponent(query.url))}`}
+      href={`/observation/${id}?url=${encodeURIComponent(encodeURIComponent(query.url))}#${firstPhoto.id}`}
       id={`${id}`}
     >
       {mediumReady ? null : (

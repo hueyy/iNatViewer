@@ -34,7 +34,7 @@ const HomeView: FC = () => {
             name="url"
             type="text"
             placeholder="URL"
-            value="https://www.inaturalist.org/observations?q=huey.xyz&search_on=tags&user_id=hueyl&per_page=200"
+            value="https://www.inaturalist.org/observations?order_by=observed_on&user_id=hueyl&verifiable=any&q=huey.xyz&search_on=tags&per_page=200"
           />
           <div className="w-full max-w-prose flex gap-4 my-4">
             <input

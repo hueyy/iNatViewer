@@ -69,12 +69,12 @@ type Props = {
   }
 }
 
-const ObservationsListView: FC<Props> = (props) => {
-  const url = props?.query?.url
+const ObservationsListView: FC<Props> = ({ query }) => {
   const [observations, setObservations] = useState<Observation[]>([])
   const { route } = useLocation()
 
   useEffect(() => {
+    const { url } = query
     if (
       typeof url === "undefined" ||
       url === null ||
@@ -83,7 +83,18 @@ const ObservationsListView: FC<Props> = (props) => {
       return route("/", true)
     }
 
-    const jsonURL = url.replace(initialString, `${initialString}.json`)
+    const queryParams = new URLSearchParams(query)
+
+    const urlQueryParamsMatches = url.match(/\?.*$/)
+    if (urlQueryParamsMatches !== null) {
+      const urlQueryParam = new URLSearchParams(urlQueryParamsMatches[0])
+      queryParams.delete("url")
+      for (const [key, value] of urlQueryParam.entries()) {
+        queryParams.set(key, value)
+      }
+    }
+
+    const jsonURL = `${initialString}.json?${queryParams.toString()}`
     ;(async () => {
       const data = await getObservationsbyURL(jsonURL)
       setObservations(data)
@@ -93,7 +104,7 @@ const ObservationsListView: FC<Props> = (props) => {
         }, 0)
       }
     })()
-  }, [url, route])
+  }, [query, route])
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6 bg-black w-full h-full">

@@ -30,10 +30,23 @@ const ObservationItem: FC<ObservationItemProps> = ({ observation }) => {
     ? getAvifURL(firstPhoto.medium_url)
     : firstPhoto.medium_url
 
+  const queryURL = query.url
+
+  const queryParams = new URLSearchParams(query)
+
+  const urlQueryParamsMatches = queryURL.match(/\?.*$/)
+  if (urlQueryParamsMatches !== null) {
+    const urlQueryParam = new URLSearchParams(urlQueryParamsMatches[0])
+    queryParams.delete("url")
+    for (const [key, value] of urlQueryParam.entries()) {
+      queryParams.set(key, value)
+    }
+  }
+
   return (
     <a
       className="aspect-square relative group"
-      href={`/observation/${id}?url=${encodeURIComponent(encodeURIComponent(query.url))}#${firstPhoto.id}`}
+      href={`/observation/${id}?url=${encodeURIComponent(encodeURIComponent(`${initialString}?${queryParams.toString()}`))}#${firstPhoto.id}`}
       id={`${id}`}
     >
       {mediumReady ? null : (
